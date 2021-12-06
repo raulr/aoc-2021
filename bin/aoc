@@ -1,0 +1,35 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+$LOAD_PATH << File.join(__dir__, '..', 'lib')
+
+require 'optparse'
+
+USAGE = "Usage: #{$PROGRAM_NAME} [options] file".freeze
+
+day = '01'
+part = 1
+
+OptionParser.new do |parser|
+  parser.banner = USAGE
+
+  parser.on('-dDAY', '--day=DAY', 'Day number') do |d|
+    day = format '%02d', d
+  end
+
+  parser.on('-pPART', '--part=PART', 'Part') do |p|
+    part = p.to_i
+  end
+end.parse!
+
+abort(USAGE) unless ARGV.length == 1
+
+require "day#{day}"
+instance = Object.const_get("Day#{day}").new(*ARGV)
+result = case part
+         when 1 then instance.solve
+         when 2 then instance.solve2
+         else abort(USAGE)
+         end
+
+puts result
