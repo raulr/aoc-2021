@@ -13,4 +13,12 @@ RSpec.describe 'Day 6' do
       expect(subject).to eq 5934
     end
   end
+
+  context 'Part 2' do
+    subject { instance.solve2 }
+
+    it 'should calculate how many lanternfish would there be after 256 days' do
+      expect(subject).to eq 26_984_457_539
+    end
+  end
 end

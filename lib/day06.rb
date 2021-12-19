@@ -5,28 +5,50 @@ require 'forwardable'
 
 # https://adventofcode.com/2021/day/6
 class Day06 < Base
-  Lanternfish = Struct.new(:timer) do
+  Lanternfish = Struct.new(:timer, :number) do
     def tick
       self.timer -= 1
 
       return unless timer.negative?
 
       self.timer = 6
-      Lanternfish.new(8)
+      Lanternfish.new(8, number)
+    end
+
+    def eql?(other)
+      timer == other.timer
+    end
+
+    def +(other)
+      Lanternfish.new(timer, number + other.number)
     end
   end
 
   # School of lanterfish
   class School
     extend Forwardable
-    def_delegators :@lanternfishes, :<<, :count
+    def_delegator :@lanternfishes, :<<
 
     def initialize
       @lanternfishes = []
     end
 
     def tick
-      @lanternfishes += @lanternfishes.map(&:tick).compact
+      @lanternfishes = @lanternfishes.each_with_object([]) do |lanterfish, response|
+        if (spawned_lanterfish = lanterfish.tick)
+          response << spawned_lanterfish
+        end
+
+        if (index = response.index(lanterfish))
+          response[index] = response[index] + lanterfish
+        else
+          response << lanterfish
+        end
+      end
+    end
+
+    def count
+      @lanternfishes.sum(&:number)
     end
   end
 
@@ -34,11 +56,15 @@ class Day06 < Base
     calculate_amount_after 80
   end
 
+  def solve2
+    calculate_amount_after 256
+  end
+
   private
 
   def parse_lanterfishes
     school = School.new
-    iterator.next.split(',').map { |timer| school << Lanternfish.new(timer.to_i) }
+    iterator.next.split(',').map(&:to_i).tally.map { |timer, number| school << Lanternfish.new(timer, number) }
     school
   end
 
